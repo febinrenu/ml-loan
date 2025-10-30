@@ -221,6 +221,19 @@ input:focus, select:focus {
     text-align: center;
 }
 
+.demo-notice {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 0.95em;
+}
+
+.demo-notice a {
+    color: #FFD700;
+    text-decoration: underline;
+}
+
 footer {
     text-align: center;
     color: white;
