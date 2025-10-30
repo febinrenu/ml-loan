@@ -113,8 +113,8 @@ dmypy.json
 Thumbs.db
 
 # Project specific
-models/*.pkl
-models/*.json
+# models/*.pkl  # COMMENTED OUT - We need models for deployment
+# models/*.json  # COMMENTED OUT - We need models for deployment
 data/processed/
 reports/*.png
 reports/*.csv
