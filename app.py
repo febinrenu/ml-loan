@@ -10,10 +10,18 @@ import sys
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
+# Try to import preprocessing module
 try:
     from src.preprocessing import LoanDataPreprocessor
-except ImportError:
-    from preprocessing import LoanDataPreprocessor
+    print("✓ Imported LoanDataPreprocessor from src.preprocessing")
+except ImportError as e:
+    print(f"⚠ Could not import from src.preprocessing: {e}")
+    try:
+        from preprocessing import LoanDataPreprocessor
+        print("✓ Imported LoanDataPreprocessor from preprocessing")
+    except ImportError as e2:
+        print(f"✗ Could not import LoanDataPreprocessor: {e2}")
+        LoanDataPreprocessor = None
 
 app = Flask(__name__, 
             template_folder='templates',
@@ -32,14 +40,37 @@ CORS(app, resources={
     }
 })
 
-# Global variables for model and preprocessor
-model = None
-preprocessor = None
+# Fallback preprocessing function in case the pickled preprocessor fails
+def fallback_preprocess_input(input_data):
+    """Fallback preprocessing function"""
+    try:
+        # Basic preprocessing - convert to the format expected by the model
+        processed = {
+            'Gender': 1 if input_data['Gender'] == 'Male' else 0,
+            'Married': 1 if input_data['Married'] == 'Yes' else 0,
+            'Dependents': int(input_data['Dependents'].replace('+', '')) if input_data['Dependents'] != '0' else 0,
+            'Education': 0 if input_data['Education'] == 'Graduate' else 1,
+            'Self_Employed': 1 if input_data['Self_Employed'] == 'Yes' else 0,
+            'ApplicantIncome': float(input_data['ApplicantIncome']),
+            'CoapplicantIncome': float(input_data['CoapplicantIncome']),
+            'LoanAmount': float(input_data['LoanAmount']),
+            'Loan_Amount_Term': float(input_data['Loan_Amount_Term']),
+            'Credit_History': float(input_data['Credit_History']),
+            'Property_Area': {'Urban': 2, 'Semiurban': 1, 'Rural': 0}[input_data['Property_Area']]
+        }
+
+        # Convert to DataFrame and then to numpy array
+        import pandas as pd
+        df = pd.DataFrame([processed])
+        return df.values
+    except Exception as e:
+        print(f"❌ Fallback preprocessing failed: {e}")
+        raise
 
 def load_artifacts():
     """Load model and preprocessor"""
     global model, preprocessor
-    
+
     try:
         # Load the best model
         model_path = 'models/best_model.pkl'
@@ -49,19 +80,23 @@ def load_artifacts():
         else:
             print(f"✗ Model not found at {model_path}")
             return False
-        
+
         # Load preprocessor
         preprocessor_path = 'models/preprocessor.pkl'
         if os.path.exists(preprocessor_path):
             preprocessor = joblib.load(preprocessor_path)
             print(f"✓ Preprocessor loaded from {preprocessor_path}")
+            print(f"✓ Preprocessor type: {type(preprocessor)}")
+            print(f"✓ Preprocessor has preprocess_input method: {hasattr(preprocessor, 'preprocess_input')}")
         else:
             print(f"✗ Preprocessor not found at {preprocessor_path}")
             return False
-        
+
         return True
     except Exception as e:
         print(f"✗ Error loading artifacts: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 @app.route('/')
@@ -135,8 +170,29 @@ def predict():
             'Property_Area': str(data['Property_Area'])
         }
         
+        # Check if model and preprocessor are loaded
+        if model is None:
+            return jsonify({
+                'error': 'Model not loaded. Please check server logs.',
+                'success': False
+            }), 500
+
         # Preprocess input
-        processed_data = preprocessor.preprocess_input(input_data)
+        try:
+            if preprocessor is not None and hasattr(preprocessor, 'preprocess_input'):
+                processed_data = preprocessor.preprocess_input(input_data)
+            else:
+                print("⚠ Using fallback preprocessing")
+                processed_data = fallback_preprocess_input(input_data)
+        except Exception as e:
+            print(f"❌ Preprocessing failed: {e}, trying fallback")
+            try:
+                processed_data = fallback_preprocess_input(input_data)
+            except Exception as e2:
+                return jsonify({
+                    'error': f'Preprocessing failed: {str(e2)}',
+                    'success': False
+                }), 500
         
         # Make prediction
         prediction = model.predict(processed_data)[0]
