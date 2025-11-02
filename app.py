@@ -40,6 +40,10 @@ CORS(app, resources={
     }
 })
 
+# Global variables for model and preprocessor
+model = None
+preprocessor = None
+
 # Fallback preprocessing function in case the pickled preprocessor fails
 def fallback_preprocess_input(input_data):
     """Fallback preprocessing function"""
@@ -264,23 +268,21 @@ def internal_error(e):
         'success': False
     }), 500
 
+# Load artifacts when the module is imported (for Gunicorn)
+print("\n" + "="*60)
+print("LOAN ELIGIBILITY PREDICTION API")
+print("="*60)
+print("\nLoading model and preprocessor...")
+
+if load_artifacts():
+    print("\n✓ All artifacts loaded successfully!")
+else:
+    print("\n⚠ Warning: Failed to load some artifacts. Predictions may fail.")
+
 if __name__ == '__main__':
-    print("\n" + "="*60)
-    print("LOAN ELIGIBILITY PREDICTION API")
+    # Run the app in development mode
+    print("\nStarting Flask development server...")
     print("="*60)
     
-    # Load artifacts
-    print("\nLoading model and preprocessor...")
-    if load_artifacts():
-        print("\n✓ All artifacts loaded successfully!")
-        print("\nStarting Flask server...")
-        print("="*60)
-        
-        # Run the app
-        port = int(os.environ.get('PORT', 5000))
-        app.run(host='0.0.0.0', port=port, debug=True)
-    else:
-        print("\n✗ Failed to load artifacts. Please run preprocessing and training first.")
-        print("Run: python src/preprocessing.py")
-        print("Then: python src/train.py")
-        sys.exit(1)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
