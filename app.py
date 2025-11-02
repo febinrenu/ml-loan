@@ -46,29 +46,48 @@ preprocessor = None
 
 # Fallback preprocessing function in case the pickled preprocessor fails
 def fallback_preprocess_input(input_data):
-    """Fallback preprocessing function"""
+    """Fallback preprocessing function with feature engineering"""
     try:
-        # Basic preprocessing - convert to the format expected by the model
-        processed = {
-            'Gender': 1 if input_data['Gender'] == 'Male' else 0,
-            'Married': 1 if input_data['Married'] == 'Yes' else 0,
-            'Dependents': int(input_data['Dependents'].replace('+', '')) if input_data['Dependents'] != '0' else 0,
-            'Education': 0 if input_data['Education'] == 'Graduate' else 1,
-            'Self_Employed': 1 if input_data['Self_Employed'] == 'Yes' else 0,
-            'ApplicantIncome': float(input_data['ApplicantIncome']),
-            'CoapplicantIncome': float(input_data['CoapplicantIncome']),
-            'LoanAmount': float(input_data['LoanAmount']),
-            'Loan_Amount_Term': float(input_data['Loan_Amount_Term']),
-            'Credit_History': float(input_data['Credit_History']),
-            'Property_Area': {'Urban': 2, 'Semiurban': 1, 'Rural': 0}[input_data['Property_Area']]
-        }
-
-        # Convert to DataFrame and then to numpy array
-        import pandas as pd
-        df = pd.DataFrame([processed])
-        return df.values
+        # Basic feature encoding
+        gender = 1 if input_data['Gender'] == 'Male' else 0
+        married = 1 if input_data['Married'] == 'Yes' else 0
+        dependents = float(input_data['Dependents'].replace('+', ''))
+        education = 1 if input_data['Education'] == 'Graduate' else 0
+        self_employed = 1 if input_data['Self_Employed'] == 'Yes' else 0
+        applicant_income = float(input_data['ApplicantIncome'])
+        coapplicant_income = float(input_data['CoapplicantIncome'])
+        loan_amount = float(input_data['LoanAmount'])
+        loan_term = float(input_data['Loan_Amount_Term'])
+        credit_history = float(input_data['Credit_History'])
+        property_area = {'Urban': 2, 'Semiurban': 1, 'Rural': 0}[input_data['Property_Area']]
+        
+        # Feature engineering (same as preprocessing.py)
+        total_income = applicant_income + coapplicant_income
+        income_loan_ratio = total_income / (loan_amount + 1)
+        loan_per_term = loan_amount / (loan_term + 1)
+        log_applicant_income = np.log1p(applicant_income)
+        log_loan_amount = np.log1p(loan_amount)
+        log_total_income = np.log1p(total_income)
+        
+        # Create feature array in the correct order (17 features total)
+        # Order: Gender, Married, Dependents, Education, Self_Employed, ApplicantIncome, 
+        #        CoapplicantIncome, LoanAmount, Loan_Amount_Term, Credit_History, Property_Area,
+        #        TotalIncome, Income_Loan_Ratio, Loan_Amount_Per_Term, Log_ApplicantIncome,
+        #        Log_LoanAmount, Log_TotalIncome
+        features = [
+            gender, married, dependents, education, self_employed,
+            applicant_income, coapplicant_income, loan_amount, loan_term,
+            credit_history, property_area, total_income, income_loan_ratio,
+            loan_per_term, log_applicant_income, log_loan_amount, log_total_income
+        ]
+        
+        # Convert to numpy array
+        return np.array([features])
+        
     except Exception as e:
         print(f"❌ Fallback preprocessing failed: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 def load_artifacts():
