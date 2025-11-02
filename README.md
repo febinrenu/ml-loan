@@ -8,6 +8,10 @@ An end-to-end machine learning project that predicts loan approval status using 
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.0.3-red.svg)](https://xgboost.readthedocs.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 
+## 🚀 Live Demo
+
+[Try the live demo here](https://ml-loan.onrender.com/)
+
 ## 🌟 Features
 
 - **Automated ML Pipeline**: Complete data preprocessing, feature engineering, and model training
