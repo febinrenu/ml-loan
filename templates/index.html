@@ -3,10 +3,779 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loan Eligibility Predictor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>🚀 Loan Eligibility Predictor - AI Powered</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0a0e27;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+            cursor: none;
+            position: relative;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 10000;
+            transition: all 0.05s ease;
+            mix-blend-mode: difference;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-100px) translateX(100px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(-50px) translateX(-100px) rotate(180deg);
+            }
+            75% {
+                transform: translateY(100px) translateX(50px) rotate(270deg);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 60px;
+            animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header h1 {
+            font-size: 4em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
+            letter-spacing: -1px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
+            }
+            to {
+                filter: drop-shadow(0 0 40px rgba(102, 126, 234, 0.8));
+            }
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            color: #a8b2ff;
+            font-weight: 300;
+            letter-spacing: 2px;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-container, .result-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 50px;
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+            flex: 1;
+            min-width: 550px;
+            max-width: 650px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .form-container::before, .result-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .form-container:hover, .result-container:hover {
+            transform: translateY(-10px);
+            box-shadow: 
+                0 15px 60px 0 rgba(102, 126, 234, 0.5),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .form-container h2, .result-container h2 {
+            color: #fff;
+            margin-bottom: 40px;
+            font-size: 2.2em;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+            z-index: 1;
+        }
+
+        .form-container h2::after, .result-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+            animation: expandWidth 1s ease 0.5s both;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 80px; }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            animation: slideIn 0.5s ease both;
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.15s; }
+        .form-group:nth-child(3) { animation-delay: 0.2s; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 1em;
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        input:hover, select:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        select option {
+            background: #1a1f3a;
+            color: #fff;
+            padding: 10px;
+        }
+
+        .submit-btn, .reset-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn::before, .reset-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .submit-btn:hover::before, .reset-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-btn:hover, .reset-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-btn:active, .reset-btn:active {
+            transform: translateY(-2px) scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn:disabled:hover {
+            transform: none;
+        }
+
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            width: 20px;
+            height: 20px;
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                width: 200px;
+                height: 200px;
+                opacity: 0;
+            }
+        }
+
+        .result-content {
+            text-align: center;
+            padding: 30px;
+            animation: zoomIn 0.5s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-approved {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 25px;
+            margin: 20px 0;
+            box-shadow: 0 20px 60px rgba(17, 153, 142, 0.4);
+            animation: bounceIn 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-rejected {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 25px;
+            margin: 20px 0;
+            box-shadow: 0 20px 60px rgba(235, 51, 73, 0.4);
+            animation: shakeIn 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shakeIn {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-10px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .result-approved::before, .result-rejected::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        .result-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: iconPulse 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .result-title {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+        }
+
+        .result-message {
+            font-size: 1.3em;
+            margin-bottom: 25px;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .result-details {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            margin-top: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideInRight 0.5s ease both;
+            font-size: 1.1em;
+        }
+
+        .detail-row:nth-child(1) { animation-delay: 0.1s; }
+        .detail-row:nth-child(2) { animation-delay: 0.2s; }
+        .detail-row:nth-child(3) { animation-delay: 0.3s; }
+        .detail-row:nth-child(4) { animation-delay: 0.4s; }
+        .detail-row:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 1.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                left: 100%;
+            }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.1em;
+            box-shadow: 0 10px 40px rgba(255, 71, 87, 0.4);
+            animation: shakeIn 0.5s ease;
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 60px;
+            padding: 30px;
+            font-size: 1em;
+            animation: fadeIn 2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        footer p {
+            margin: 5px 0;
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #f0f;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e27;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            animation: fadeOut 1s ease 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(102, 126, 234, 0.2);
+            border-top: 8px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Scroll animations */
+        .scroll-fade {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: scrollFade 0.8s ease forwards;
+        }
+
+        @keyframes scrollFade {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(56, 239, 125, 0.2);
+            border: 1px solid rgba(56, 239, 125, 0.5);
+            border-radius: 20px;
+            color: #38ef7d;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            animation: slideInRight 0.5s ease;
+            display: none;
+        }
+
+        .status-indicator.active {
+            display: block;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #38ef7d;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+
+            .cursor, .cursor-dot {
+                display: none;
+            }
+
+            .form-container, .result-container {
+                min-width: 100%;
+                padding: 30px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2.5em;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            .result-title {
+                font-size: 2em;
+            }
+
+            .result-icon {
+                font-size: 4em;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+
+    <!-- Status Indicator -->
+    <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot"></span>
+        <span>Server Connected</span>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <canvas id="particleCanvas"></canvas>
+    </div>
     <div class="container">
         <header>
             <h1>🏦 Loan Eligibility Predictor</h1>
@@ -145,10 +914,498 @@
         </div>
 
         <footer>
-            <p>© 2025 Loan Eligibility Predictor | Powered by Machine Learning</p>
+            <p>✨ © 2025 Loan Eligibility Predictor ✨</p>
+            <p>🤖 Powered by Advanced Machine Learning & AI 🤖</p>
+            <p>💜 Built with Passion & Innovation 💜</p>
         </footer>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // API endpoint - change this to your deployed backend URL
+        const API_URL = window.location.origin;
+
+        // ==================== CUSTOM CURSOR ====================
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursorDot.style.left = (e.clientX - 4) + 'px';
+            cursorDot.style.top = (e.clientY - 4) + 'px';
+        });
+
+        // Cursor hover effects
+        const hoverElements = document.querySelectorAll('input, select, button, a');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursor.style.background = 'rgba(102, 126, 234, 0.3)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.background = 'transparent';
+            });
+        });
+
+        // ==================== PARTICLE BACKGROUND ====================
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        const numberOfParticles = 100;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * 1 - 0.5;
+                this.color = `rgba(${102 + Math.random() * 50}, ${126 + Math.random() * 50}, 234, ${Math.random() * 0.5 + 0.3})`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particlesArray = [];
+            for (let i = 0; i < numberOfParticles; i++) {
+                particlesArray.push(new Particle());
+            }
+        }
+
+        function connectParticles() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    const dx = particlesArray[a].x - particlesArray[b].x;
+                    const dy = particlesArray[a].y - particlesArray[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 120) {
+                        ctx.strokeStyle = `rgba(102, 126, 234, ${1 - distance / 120})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            init();
+        });
+
+        // ==================== RIPPLE EFFECT ====================
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = event.clientX - rect.left - size / 2;
+            const y = event.clientY - rect.top - size / 2;
+
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.classList.add('ripple');
+
+            button.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        document.querySelectorAll('.submit-btn, .reset-btn').forEach(button => {
+            button.addEventListener('click', createRipple);
+        });
+
+        // ==================== CONFETTI ====================
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 10);
+            }
+        }
+
+        // ==================== SERVER STATUS CHECK ====================
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const health = await response.json();
+                
+                const statusIndicator = document.getElementById('statusIndicator');
+                if (health.model_loaded && health.preprocessor_loaded) {
+                    statusIndicator.classList.add('active');
+                    setTimeout(() => {
+                        statusIndicator.classList.remove('active');
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Failed to check server health:', error);
+            }
+        }
+
+        window.addEventListener('load', checkServerStatus);
+
+        // ==================== FORM SUBMISSION ====================
+        document.getElementById('loanForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                Name: document.getElementById('name').value,
+                Gender: document.getElementById('gender').value,
+                Married: document.getElementById('married').value,
+                Dependents: document.getElementById('dependents').value,
+                Education: document.getElementById('education').value,
+                Self_Employed: document.getElementById('self_employed').value,
+                ApplicantIncome: parseFloat(document.getElementById('applicant_income').value),
+                CoapplicantIncome: parseFloat(document.getElementById('coapplicant_income').value),
+                LoanAmount: parseFloat(document.getElementById('loan_amount').value),
+                Loan_Amount_Term: parseFloat(document.getElementById('loan_term').value),
+                Credit_History: parseFloat(document.getElementById('credit_history').value),
+                Property_Area: document.getElementById('property_area').value
+            };
+            
+            // Validate data
+            if (!validateFormData(formData)) {
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const loader = submitBtn.querySelector('.loader');
+            
+            submitBtn.disabled = true;
+            btnText.textContent = 'Processing...';
+            loader.style.display = 'inline-block';
+            
+            try {
+                // Send prediction request
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResult(result);
+                } else {
+                    displayError(result.error || 'Prediction failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                displayError('Failed to connect to the server. Please try again.');
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                btnText.textContent = 'Predict Eligibility';
+                loader.style.display = 'none';
+            }
+        });
+
+        // Validate form data
+        function validateFormData(data) {
+            // Check for empty fields
+            for (const [key, value] of Object.entries(data)) {
+                if (value === '' || value === null || value === undefined) {
+                    displayError(`Please fill in all required fields: ${key}`);
+                    return false;
+                }
+            }
+            
+            // Validate numeric fields
+            if (data.ApplicantIncome < 0 || data.CoapplicantIncome < 0 || data.LoanAmount <= 0) {
+                displayError('Income and loan amount must be positive values');
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Display prediction result
+        function displayResult(result) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const formContainer = document.querySelector('.form-container');
+            
+            const isApproved = result.prediction === 'Approved';
+            const confidence = (result.confidence * 100).toFixed(2);
+            const probabilityApproved = (result.probability_approved * 100).toFixed(2);
+            const probabilityRejected = (result.probability_rejected * 100).toFixed(2);
+            
+            const resultClass = isApproved ? 'result-approved' : 'result-rejected';
+            const icon = isApproved ? '🎉' : '❌';
+            const title = isApproved ? 'Loan Approved!' : 'Loan Rejected';
+            const message = isApproved 
+                ? `Congratulations ${result.applicant_name}! Your loan application has been approved.`
+                : `Sorry ${result.applicant_name}, your loan application has been rejected. Please review your application details.`;
+            
+            // Trigger confetti for approved loans
+            if (isApproved) {
+                createConfetti();
+            }
+            
+            resultContent.innerHTML = `
+                <div class="${resultClass}">
+                    <div class="result-icon">${icon}</div>
+                    <div class="result-title">${title}</div>
+                    <div class="result-message">${message}</div>
+                    
+                    <div class="result-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Applicant:</span>
+                            <span>${result.applicant_name}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Decision:</span>
+                            <span><strong>${result.prediction}</strong></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Confidence:</span>
+                            <span><strong>${confidence}%</strong></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Approval Probability:</span>
+                            <span><strong>${probabilityApproved}%</strong></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Rejection Probability:</span>
+                            <span><strong>${probabilityRejected}%</strong></span>
+                        </div>
+                    </div>
+                    
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: ${confidence}%;">
+                            ${confidence}%
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Hide form and show result
+            formContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+            
+            // Scroll to result
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Display error message
+        function displayError(message) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const formContainer = document.querySelector('.form-container');
+            
+            resultContent.innerHTML = `
+                <div class="error-message">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+            
+            formContainer.style.display = 'none';
+            resultContainer.style.display = 'block';
+        }
+
+        // Reset form
+        function resetForm() {
+            const formContainer = document.querySelector('.form-container');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // Add animation
+            resultContainer.style.animation = 'zoomOut 0.5s ease forwards';
+            
+            setTimeout(() => {
+                formContainer.style.display = 'block';
+                resultContainer.style.display = 'none';
+                resultContainer.style.animation = '';
+                
+                // Scroll to form with smooth animation
+                formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Reset form fields
+                document.getElementById('loanForm').reset();
+            }, 500);
+        }
+
+        // Zoom out animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes zoomOut {
+                to {
+                    opacity: 0;
+                    transform: scale(0.8);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ==================== INPUT ANIMATIONS ====================
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.querySelector('label').style.transform = 'translateY(-5px)';
+                this.parentElement.querySelector('label').style.color = '#667eea';
+            });
+            
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.querySelector('label').style.transform = 'translateY(0)';
+                    this.parentElement.querySelector('label').style.color = '#fff';
+                }
+            });
+        });
+
+        // ==================== FORM VALIDATION VISUAL FEEDBACK ====================
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#ff4757';
+                this.style.animation = 'shake 0.5s ease';
+                
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 500);
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.validity.valid) {
+                    this.style.borderColor = 'rgba(56, 239, 125, 0.5)';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
+        });
+
+        const shakeStyle = document.createElement('style');
+        shakeStyle.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(shakeStyle);
+
+        // ==================== SCROLL REVEAL ANIMATION ====================
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('scroll-fade');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.form-group').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ==================== TYPING EFFECT FOR SUBTITLE ====================
+        const subtitle = document.querySelector('.subtitle');
+        const originalText = subtitle.textContent;
+        subtitle.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < originalText.length) {
+                subtitle.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        
+        setTimeout(typeWriter, 1000);
+
+        // ==================== EASTER EGG - KONAMI CODE ====================
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    createConfetti();
+                    alert('🎮 Konami Code Activated! 🎉');
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        // ==================== PERFORMANCE MONITORING ====================
+        if ('PerformanceObserver' in window) {
+            const perfObserver = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (entry.duration > 1000) {
+                        console.warn('Slow operation detected:', entry.name, entry.duration + 'ms');
+                    }
+                }
+            });
+            perfObserver.observe({ entryTypes: ['measure', 'navigation'] });
+        }
+
+        console.log('%c🚀 Loan Eligibility Predictor', 'font-size: 20px; color: #667eea; font-weight: bold;');
+        console.log('%cPowered by AI & Machine Learning', 'font-size: 14px; color: #764ba2;');
+        console.log('%cBuilt with ❤️ by Your Team', 'font-size: 12px; color: #38ef7d;');
+    </script>
 </body>
 </html>

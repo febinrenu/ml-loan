@@ -1,7 +1,3 @@
-"""
-Flask API for Loan Eligibility Prediction
-Provides REST endpoints for making predictions
-"""
 
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
@@ -22,7 +18,19 @@ except ImportError:
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static')
-CORS(app)
+
+# Disable template caching for development
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+# Configure CORS to allow all origins
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # Global variables for model and preprocessor
 model = None
@@ -59,7 +67,12 @@ def load_artifacts():
 @app.route('/')
 def home():
     """Serve the main web page"""
-    return render_template('index.html')
+    response = app.make_response(render_template('index.html'))
+    # Disable caching to ensure fresh content
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -70,17 +83,24 @@ def health():
         'preprocessor_loaded': preprocessor is not None
     })
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
     """
     Prediction endpoint
     Expects JSON with loan applicant details
     """
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        return '', 204
+    
     try:
         # Get JSON data from request
         data = request.get_json()
         
+        print(f"\n📥 Received prediction request: {data}")
+        
         if not data:
+            print("❌ No data provided")
             return jsonify({
                 'error': 'No data provided',
                 'success': False
@@ -133,14 +153,20 @@ def predict():
             'applicant_name': data.get('Name', 'Applicant')
         }
         
+        print(f"✅ Prediction result: {result['prediction']} (confidence: {result['confidence']:.2%})")
+        
         return jsonify(result)
     
     except ValueError as e:
+        print(f"❌ ValueError: {str(e)}")
         return jsonify({
             'error': f'Invalid data type: {str(e)}',
             'success': False
         }), 400
     except Exception as e:
+        print(f"❌ Exception: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'error': f'Prediction error: {str(e)}',
             'success': False
@@ -196,7 +222,7 @@ if __name__ == '__main__':
         
         # Run the app
         port = int(os.environ.get('PORT', 5000))
-        app.run(host='0.0.0.0', port=port, debug=False)
+        app.run(host='0.0.0.0', port=port, debug=True)
     else:
         print("\n✗ Failed to load artifacts. Please run preprocessing and training first.")
         print("Run: python src/preprocessing.py")
